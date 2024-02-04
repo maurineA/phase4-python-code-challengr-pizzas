@@ -1,25 +1,29 @@
+from flask import Flask, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
+# from flask_marshmallow import Marshmallow
 
-db = SQLAlchemy()
+app = Flask(__name__)
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///app.db'  # You can change this to your preferred database URL
+db = SQLAlchemy(app)
+# ma = Marshmallow(app)
 
-
+# Models
 class Restaurant(db.Model):
-    __tablename__ = 'restaurants'
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(80))
-    address = db.Column(db.String(120))
-    pizzas = db.relationship('Pizza', secondary='restaurant_pizzas', backref='restaurants')
+    name = db.Column(db.String)
+    address = db.Column(db.String)
+    pizzas = db.relationship('Pizza', secondary='restaurant_pizza', back_populates='restaurants')
 
 class Pizza(db.Model):
-    __tablename__ = 'pizzas'
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(80))
-    ingredients = db.Column(db.String(255))
+    name = db.Column(db.String)
+    ingredients = db.Column(db.String)
+    restaurants = db.relationship('Restaurant', secondary='restaurant_pizza', back_populates='pizzas')
 
 class RestaurantPizza(db.Model):
-    __tablename__ = 'restaurantpizzas'
     id = db.Column(db.Integer, primary_key=True)
-    restaurant_id = db.Column(db.Integer, db.ForeignKey('restaurants.id'))
-    pizza_id = db.Column(db.Integer, db.ForeignKey('pizzas.id'))
-    price = db.Column(db.Integer, nullable=False)
-
+    price = db.Column(db.Float)
+    pizza_id = db.Column(db.Integer, db.ForeignKey('pizza.id'))
+    restaurant_id = db.Column(db.Integer, db.ForeignKey('restaurant.id'))
+    pizza = db.relationship('Pizza', back_populates='restaurant_pizzas')
+   
