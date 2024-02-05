@@ -1,4 +1,5 @@
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy.orm import validates
 
 
  
@@ -28,3 +29,9 @@ class RestaurantPizza(db.Model):
     pizza_id = db.Column(db.Integer, db.ForeignKey('pizzas.id')) 
     restaurant_id = db.Column(db.Integer, db.ForeignKey('restaurants.id'))  
     pizza = db.relationship('Pizza', back_populates='restaurant_pizzas')
+
+    @validates('price')
+    def validate_price(self, key, value):
+        if not (200 <= value <= 2500):
+            raise ValueError("Price must be between 200 and 2500.")
+        return value
