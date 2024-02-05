@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-from flask import Flask, jsonify, make_response request, jsonify
+from flask import Flask, jsonify, make_response, request, jsonify
 from flask_migrate import Migrate
 
 from models import db, Restaurant, Pizza, RestaurantPizza
@@ -52,6 +52,29 @@ def get_pizzas():
     pizzas = Pizza.query.all()
     result = [{"id": pizza.id, "name": pizza.name, "ingredients": pizza.ingredients} for pizza in pizzas]
     return jsonify(result)
+
+@app.route('/restaurant_pizzas', methods=['POST'])
+def create_restaurant_pizza():
+    data = request.get_json()
+    price = data.get("price")
+    pizza_id = data.get("pizza_id")
+    restaurant_id = data.get("restaurant_id")
+
+    if not (price and pizza_id and restaurant_id):
+        return jsonify({"errors": ["validation errors"]}), 400
+
+    pizza = Pizza.query.get(pizza_id)
+    restaurant = Restaurant.query.get(restaurant_id)
+
+    if not (pizza and restaurant):
+        return jsonify({"errors": ["validation errors"]}), 400
+
+    restaurant_pizza = RestaurantPizza(price=price, restaurant=restaurant, pizza=pizza)
+    db.session.add(restaurant_pizza)
+    db.session.commit()
+
+    return jsonify({"id": pizza.id, "name": pizza.name, "ingredients": pizza.ingredients}), 201
+
 
 if __name__ == '__main__':
     app.run(port=5555, debug=True)
