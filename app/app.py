@@ -26,10 +26,10 @@ def get_restaurants():
 
 @app.route('/restaurants/<int:id>', methods=['GET'])
 def get_restaurant(id):
-    restaurant = Restaurant.query.get(id)
-    if restaurant:
-        pizzas = [{"id": pizza.id, "name": pizza.name, "ingredients": pizza.ingredients} for pizza in restaurant.pizzas]
-        result = {"id": restaurant.id, "name": restaurant.name, "address": restaurant.address, "pizzas": pizzas}
+    restaurants = Restaurant.query.get(id)
+    if restaurants:
+        pizzas = [{"id": pizza.id, "name": pizza.name, "ingredients": pizza.ingredients} for pizza in restaurants.pizzas]
+        result = {"id": restaurants.id, "name": restaurants.name, "address": restaurants.address, "pizzas": pizzas}
         return jsonify(result)
     else:
         return jsonify({"error": "Restaurant not found"}), 404
@@ -37,10 +37,10 @@ def get_restaurant(id):
     
 @app.route('/restaurants/<int:id>', methods=['DELETE'])
 def delete_restaurant(id):
-    restaurant = Restaurant.query.get(id)
-    if restaurant:
+    restaurants = Restaurant.query.get(id)
+    if restaurants:
         RestaurantPizza.query.filter_by(restaurant_id=id).delete()
-        db.session.delete(restaurant)
+        db.session.delete(restaurants)
         db.session.commit()
         return '', 204
     else:
